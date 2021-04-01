@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Turf.js | Advanced Geospatial Analysis</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <!-- Import Mapbox GL JS  -->
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.js'></script>
+  <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.css' type='text/css' />
+  <script src="https://api.mapbox.com/mapbox.js/plugins/turf/v3.0.11/turf.min.js"></script>
+  <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      width: 600px;
+      height: 500px;
+    }
+
+  </style>
+  </head>
+  <body>
+  <body>
+<!-- Create a container for the map -->
+  <div id='map'></div>
+
+  <button onclick ="simplify()"> Simplify </button>
+
+
+  <script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoianVsaWV0dGEiLCJhIjoiY2ttMzUzM2tzNGsydzJ2cW1odHM4dDFuZSJ9.SpeVdw2vSfTcXc9yN3fkxQ';
+    var map = new mapboxgl.Map({
+      container: 'map', // Specify the container ID
+      style: 'mapbox://styles/mapbox/streets-v11', // Specify which map style to use
+      center: [-114.072, 51.045], // Specify the starting position
+      zoom: 13, // Specify the starting zoom
+    });
+
+    var draw = new MapboxDraw({
+  // Instead of showing all the draw tools, show only the line string and delete tools
+  displayControlsDefault: false,
+  controls: {
+    line_string: true,
+    trash: true
+  },
+  styles: [
+    // Set the line style for the user-input coordinates
+    {
+      "id": "gl-draw-line",
+      "type": "line",
+      "filter": ["all", ["==", "$type", "LineString"],
+        ["!=", "mode", "static"]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#438EE4",
+        "line-dasharray": [0.2, 2],
+        "line-width": 4,
+        "line-opacity": 0.7
+      }
+    },
+    // Style the vertex point halos
+    {
+      "id": "gl-draw-polygon-and-line-vertex-halo-active",
+      "type": "circle",
+      "filter": ["all", ["==", "meta", "vertex"],
+        ["==", "$type", "Point"],
+        ["!=", "mode", "static"]
+      ],
+      "paint": {
+        "circle-radius": 12,
+        "circle-color": "#FFF"
+      }
+    },
+    // Style the vertex points
+    {
+      "id": "gl-draw-polygon-and-line-vertex-active",
+      "type": "circle",
+      "filter": ["all", ["==", "meta", "vertex"],
+        ["==", "$type", "Point"],
+        ["!=", "mode", "static"]
+      ],
+      "paint": {
+        "circle-radius": 8,
+        "circle-color": "#438EE4",
+      }
+    },
+  ]
+});
+
+// Add the draw tool to the map
+map.addControl(draw);
+
+
+function simplify()
+{
+    var data = draw.getAll(); // Extract the features and geometry information from draw
+    var options = {tolerance: 0.01, highQuality: false};
+    var simplified = turf.simplify(data, options);
+    draw.add(simplified); // Add simplified line to draw layer
+}
+
+</script>
+
+</body>
+</html>
